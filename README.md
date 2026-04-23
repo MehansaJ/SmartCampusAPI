@@ -30,7 +30,7 @@ A high-performance RESTful web service built with **Jakarta EE (JAX-RS)** and **
 **Step 1** — Clone the repository:
 
 ```bash
-git clone https://github.com/<username>/SmartCampusAPI.git
+git clone https://github.com/MehansaJ/SmartCampusAPI.git
 cd SmartCampusAPI
 ```
 
