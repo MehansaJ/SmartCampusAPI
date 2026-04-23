@@ -22,7 +22,7 @@ public class Main {
             System.out.println("SmartCampusAPI Embedded Grizzly Server has started!");
             System.out.println("=========================================================");
             System.out.println("You can view your initialized standard discovery endpoint here:");
-            System.out.println("👉 http://localhost:8080/api/v1/rooms");
+            System.out.println("👉 http://localhost:8080/api/v1");
             System.out.println("=========================================================");
             System.out.println("Leave this terminal open to keep the server running.");
             System.out.println("Hit Enter to safely stop the server...");

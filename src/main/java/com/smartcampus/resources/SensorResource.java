@@ -1,6 +1,5 @@
 package com.smartcampus.resources;
 
-import com.smartcampus.model.Room;
 import com.smartcampus.model.Sensor;
 import com.smartcampus.repository.DataStore;
 import com.smartcampus.exceptions.LinkedResourceNotFoundException;
@@ -47,15 +46,16 @@ public class SensorResource {
 
     @POST
     public Response createSensor(@QueryParam("roomId") String roomId, Sensor sensor) {
+        // 1. Check if roomId exists in the DataStore first
+        if (roomId == null || roomId.trim().isEmpty() || !dataStore.getRooms().containsKey(roomId)) {
+            throw new LinkedResourceNotFoundException("Room with ID '" + roomId + "' not found. Cannot link sensor.");
+        }
+
+        // 2. Validate sensor input
         if (sensor == null || sensor.getId() == null || sensor.getId().trim().isEmpty()) {
             return Response.status(Response.Status.BAD_REQUEST)
                            .entity("Invalid input. Sensor ID is required.")
                            .build();
-        }
-
-        // Make sure the room exists before linking the sensor to it
-        if (roomId == null || roomId.trim().isEmpty() || !dataStore.getRooms().containsKey(roomId)) {
-            throw new LinkedResourceNotFoundException("Room ID missing or matching Room not found for roomId: " + roomId);
         }
 
         if (dataStore.getSensors().containsKey(sensor.getId())) {
@@ -64,19 +64,19 @@ public class SensorResource {
                            .build();
         }
 
+        // 3. Save the sensor
         sensor.setRoomId(roomId);
         dataStore.getSensors().put(sensor.getId(), sensor);
 
-        // Link ID to the room's sensor list
-        Room room = dataStore.getRooms().get(roomId);
-        room.getSensorIds().add(sensor.getId());
+        // 4. Call helper method to link sensor to room
+        dataStore.linkSensorToRoom(roomId, sensor.getId());
 
         return Response.status(Response.Status.CREATED).entity(sensor).build();
     }
 
     @PUT
     @Path("/{id}")
-    public Response updateSensorValue(@PathParam("id") String id, Sensor updatedSensorData) {
+    public Response updateSensor(@PathParam("id") String id, Sensor updatedSensorData) {
         if (!dataStore.getSensors().containsKey(id)) {
             return Response.status(Response.Status.NOT_FOUND)
                            .entity("Sensor with ID '" + id + "' not found to update.")
@@ -85,9 +85,16 @@ public class SensorResource {
 
         Sensor existingSensor = dataStore.getSensors().get(id);
 
-        // Only update the current value field
-        if (updatedSensorData != null && updatedSensorData.getCurrentValue() != 0) {
-             existingSensor.setCurrentValue(updatedSensorData.getCurrentValue());
+        if (updatedSensorData != null) {
+            // Update the current value field if provided
+            if (updatedSensorData.getCurrentValue() != 0) {
+                 existingSensor.setCurrentValue(updatedSensorData.getCurrentValue());
+            }
+            
+            // Task 5.3: Update status field to allow demonstrating 403 Forbidden
+            if (updatedSensorData.getStatus() != null && !updatedSensorData.getStatus().trim().isEmpty()) {
+                existingSensor.setStatus(updatedSensorData.getStatus());
+            }
         }
 
         return Response.ok(existingSensor).build();

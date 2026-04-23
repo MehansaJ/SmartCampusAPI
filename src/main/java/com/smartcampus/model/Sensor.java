@@ -7,6 +7,7 @@ public class Sensor {
     // ACTIVE or MAINTENANCE
     private String status;
     private double currentValue;
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private String roomId;
 
     public Sensor() {

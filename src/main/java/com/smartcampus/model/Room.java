@@ -9,16 +9,15 @@ public class Room {
     private int capacity;
     private List<String> sensorIds;
 
-    // Required for Jackson JSON serialization
     public Room() {
         this.sensorIds = new CopyOnWriteArrayList<>();
     }
 
     public Room(String id, String name, int capacity) {
-        this();
         this.id = id;
         this.name = name;
         this.capacity = capacity;
+        this.sensorIds = new CopyOnWriteArrayList<>();
     }
 
     public String getId() {

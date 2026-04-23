@@ -28,16 +28,14 @@ public class RoomResource {
     }
 
     @GET
-    @Path("/{id}")
-    public Response getRoomById(@PathParam("id") String id) {
-        Room room = dataStore.getRooms().get(id);
-
+    @Path("/{roomId}")
+    public Response getRoom(@PathParam("roomId") String roomId) {
+        Room room = dataStore.getRooms().get(roomId);
         if (room == null) {
             return Response.status(Response.Status.NOT_FOUND)
-                           .entity("Room with ID '" + id + "' not found.")
+                           .entity("Room with ID '" + roomId + "' not found.")
                            .build();
         }
-
         return Response.ok(room).build();
     }
 

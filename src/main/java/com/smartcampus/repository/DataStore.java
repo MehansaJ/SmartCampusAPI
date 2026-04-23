@@ -43,6 +43,20 @@ public class DataStore {
         return readings;
     }
 
+    public void linkSensorToRoom(String roomId, String sensorId) {
+        Room room = rooms.get(roomId);
+        if (room != null) {
+            // Null-safe check and optional initialization
+            if (room.getSensorIds() == null) {
+                room.setSensorIds(new java.util.concurrent.CopyOnWriteArrayList<>());
+            }
+            // Add only if not already present
+            if (!room.getSensorIds().contains(sensorId)) {
+                room.getSensorIds().add(sensorId);
+            }
+        }
+    }
+
     public void initData() {
         Room r1 = new Room("R001", "Library", 50);
         Room r2 = new Room("R002", "Lab 101", 30);

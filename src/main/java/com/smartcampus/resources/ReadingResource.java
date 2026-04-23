@@ -35,7 +35,7 @@ public class ReadingResource {
     }
 
     @POST
-    public Response addReading(@PathParam("id") String sensorId, Reading reading) {
+    public Response createReading(@PathParam("id") String sensorId, Reading reading) {
         Sensor sensor = dataStore.getSensors().get(sensorId);
 
         if (sensor == null) {
@@ -44,6 +44,7 @@ public class ReadingResource {
                     .build();
         }
 
+        // Task 5.3: Check parent sensor status. Throw 403 if MAINTENANCE.
         if ("MAINTENANCE".equalsIgnoreCase(sensor.getStatus())) {
             throw new SensorUnavailableException(
                     "Sensor '" + sensorId + "' is currently under MAINTENANCE and cannot accept new readings.");
