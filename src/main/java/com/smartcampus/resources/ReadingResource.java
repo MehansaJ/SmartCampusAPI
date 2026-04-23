@@ -8,14 +8,14 @@ import com.smartcampus.exceptions.SensorUnavailableException;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
-@Path("/sensors/{id}/readings")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class ReadingResource {
@@ -24,15 +24,14 @@ public class ReadingResource {
 
     @GET
     public Response getReadings(@PathParam("id") String sensorId) {
-        Sensor sensor = dataStore.getSensors().get(sensorId);
-
-        if (sensor == null) {
+        if (!dataStore.getSensors().containsKey(sensorId)) {
             return Response.status(Response.Status.NOT_FOUND)
-                           .entity("Sensor with ID '" + sensorId + "' not found.")
-                           .build();
+                    .entity("Sensor with ID '" + sensorId + "' not found.")
+                    .build();
         }
 
-        return Response.ok(sensor.getReadings()).build();
+        List<Reading> list = dataStore.getReadings().getOrDefault(sensorId, new ArrayList<>());
+        return Response.ok(list).build();
     }
 
     @POST
@@ -41,27 +40,25 @@ public class ReadingResource {
 
         if (sensor == null) {
             return Response.status(Response.Status.NOT_FOUND)
-                           .entity("Sensor with ID '" + sensorId + "' not found.")
-                           .build();
+                    .entity("Sensor with ID '" + sensorId + "' not found.")
+                    .build();
         }
 
-        // Block new readings if the sensor is under maintenance
         if ("MAINTENANCE".equalsIgnoreCase(sensor.getStatus())) {
-            throw new SensorUnavailableException("Sensor '" + sensorId + "' is currently under MAINTENANCE and cannot accept new readings.");
+            throw new SensorUnavailableException(
+                    "Sensor '" + sensorId + "' is currently under MAINTENANCE and cannot accept new readings.");
         }
 
         if (reading == null) {
             return Response.status(Response.Status.BAD_REQUEST)
-                           .entity("Reading data is missing.")
-                           .build();
+                    .entity("Reading data is missing.")
+                    .build();
         }
 
-        // Auto-set the timestamp if it wasn't included in the request
-        if (reading.getTimestamp() == null) {
-            reading.setTimestamp(LocalDateTime.now());
-        }
+        // Initialize readings list for sensor if missing
+        dataStore.getReadings().putIfAbsent(sensorId, new CopyOnWriteArrayList<>());
+        dataStore.getReadings().get(sensorId).add(reading);
 
-        sensor.getReadings().add(reading);
         sensor.setCurrentValue(reading.getValue());
 
         return Response.status(Response.Status.CREATED).entity(reading).build();

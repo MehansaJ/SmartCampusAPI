@@ -10,7 +10,10 @@ public class GlobalExceptionMapper implements ExceptionMapper<Throwable> {
 
     @Override
     public Response toResponse(Throwable exception) {
-        ErrorResponse errorResponse = new ErrorResponse("Internal Server Error", "An unexpected error occurred: " + exception.getMessage());
+        // Obfuscate internal error details for security (Cybersecurity Task)
+        ErrorResponse errorResponse = new ErrorResponse("Internal Server Error", 
+                "An unexpected error occurred. Please contact support.");
+                
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                        .entity(errorResponse)
                        .type(MediaType.APPLICATION_JSON)

@@ -64,11 +64,12 @@ public class SensorResource {
                            .build();
         }
 
+        sensor.setRoomId(roomId);
         dataStore.getSensors().put(sensor.getId(), sensor);
 
-        // Also add the sensor to the specific room's list
+        // Link ID to the room's sensor list
         Room room = dataStore.getRooms().get(roomId);
-        room.getSensors().add(sensor);
+        room.getSensorIds().add(sensor.getId());
 
         return Response.status(Response.Status.CREATED).entity(sensor).build();
     }
@@ -85,10 +86,16 @@ public class SensorResource {
         Sensor existingSensor = dataStore.getSensors().get(id);
 
         // Only update the current value field
-        if (updatedSensorData != null && updatedSensorData.getCurrentValue() != null) {
+        if (updatedSensorData != null && updatedSensorData.getCurrentValue() != 0) {
              existingSensor.setCurrentValue(updatedSensorData.getCurrentValue());
         }
 
         return Response.ok(existingSensor).build();
+    }
+
+    // Task 4.1: Sub-Resource Locator Pattern
+    @Path("/{id}/readings")
+    public ReadingResource getReadingResource() {
+        return new ReadingResource();
     }
 }

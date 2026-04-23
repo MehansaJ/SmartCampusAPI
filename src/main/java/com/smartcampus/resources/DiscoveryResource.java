@@ -9,7 +9,6 @@ import jakarta.ws.rs.core.Response;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-// Root endpoint — shows basic API info and available links
 @Path("/")
 @Produces(MediaType.APPLICATION_JSON)
 public class DiscoveryResource {
@@ -19,6 +18,13 @@ public class DiscoveryResource {
         Map<String, Object> discoveryMap = new LinkedHashMap<>();
         discoveryMap.put("name", "Smart Campus API");
         discoveryMap.put("version", "1.0.0");
+
+        Map<String, String> contact = new LinkedHashMap<>();
+        contact.put("author", "Jayathmi Mehansa Gunawardhana");
+        contact.put("student_id", "20231209 / w2120249");
+        contact.put("email", "w2120249@westminster.ac.uk");
+        discoveryMap.put("contact", contact);
+
         discoveryMap.put("description", "RESTful API for Smart Campus Room and Sensor management.");
 
         Map<String, String> links = new LinkedHashMap<>();

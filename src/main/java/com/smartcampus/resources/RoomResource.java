@@ -27,6 +27,20 @@ public class RoomResource {
         return dataStore.getRooms().values();
     }
 
+    @GET
+    @Path("/{id}")
+    public Response getRoomById(@PathParam("id") String id) {
+        Room room = dataStore.getRooms().get(id);
+
+        if (room == null) {
+            return Response.status(Response.Status.NOT_FOUND)
+                           .entity("Room with ID '" + id + "' not found.")
+                           .build();
+        }
+
+        return Response.ok(room).build();
+    }
+
     @POST
     public Response createRoom(Room room) {
         if (room == null || room.getId() == null || room.getId().trim().isEmpty()) {
@@ -58,7 +72,7 @@ public class RoomResource {
         }
 
         // Can't delete a room that still has sensors in it
-        if (room.getSensors() != null && !room.getSensors().isEmpty()) {
+        if (room.getSensorIds() != null && !room.getSensorIds().isEmpty()) {
             throw new RoomNotEmptyException("Cannot delete room: Room '" + roomId + "' contains sensors.");
         }
 

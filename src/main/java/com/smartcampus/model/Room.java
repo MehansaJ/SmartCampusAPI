@@ -6,18 +6,19 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class Room {
     private String id;
     private String name;
-    private int floor;
-    private List<Sensor> sensors;
+    private int capacity;
+    private List<String> sensorIds;
 
+    // Required for Jackson JSON serialization
     public Room() {
-        this.sensors = new CopyOnWriteArrayList<>();
+        this.sensorIds = new CopyOnWriteArrayList<>();
     }
 
-    public Room(String id, String name, int floor) {
+    public Room(String id, String name, int capacity) {
+        this();
         this.id = id;
         this.name = name;
-        this.floor = floor;
-        this.sensors = new CopyOnWriteArrayList<>();
+        this.capacity = capacity;
     }
 
     public String getId() {
@@ -36,19 +37,19 @@ public class Room {
         this.name = name;
     }
 
-    public int getFloor() {
-        return floor;
+    public int getCapacity() {
+        return capacity;
     }
 
-    public void setFloor(int floor) {
-        this.floor = floor;
+    public void setCapacity(int capacity) {
+        this.capacity = capacity;
     }
 
-    public List<Sensor> getSensors() {
-        return sensors;
+    public List<String> getSensorIds() {
+        return sensorIds;
     }
 
-    public void setSensors(List<Sensor> sensors) {
-        this.sensors = sensors;
+    public void setSensorIds(List<String> sensorIds) {
+        this.sensorIds = sensorIds;
     }
 }

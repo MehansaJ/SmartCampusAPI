@@ -1,16 +1,41 @@
 package com.smartcampus.model;
 
-import java.time.LocalDateTime;
+import java.util.UUID;
 
 public class Reading {
+    private String id;
+    private long timestamp;
     private double value;
-    private LocalDateTime timestamp;
 
     public Reading() {
+        this.id = UUID.randomUUID().toString();
+        this.timestamp = System.currentTimeMillis();
     }
 
-    public Reading(double value, LocalDateTime timestamp) {
+    public Reading(double value) {
+        this();
         this.value = value;
+    }
+
+    public Reading(String id, long timestamp, double value) {
+        this.id = id;
+        this.timestamp = timestamp;
+        this.value = value;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
     }
 
@@ -20,13 +45,5 @@ public class Reading {
 
     public void setValue(double value) {
         this.value = value;
-    }
-
-    public LocalDateTime getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(LocalDateTime timestamp) {
-        this.timestamp = timestamp;
     }
 }
