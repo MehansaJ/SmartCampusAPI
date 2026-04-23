@@ -18,6 +18,16 @@ A high-performance RESTful web service built with **Jakarta EE (JAX-RS)** and **
 
 ---
 
+## 📂 Project Structure
+
+- `com.smartcampus.resources`: JAX-RS Resource classes (Endpoints)
+- `com.smartcampus.models`: POJOs (Room, Sensor, Reading)
+- `com.smartcampus.exceptions`: Custom exceptions and ExceptionMappers (Part 5)
+- `com.smartcampus.filters`: Logging and Security filters
+- `com.smartcampus.data`: DataStore singleton and thread-safe storage
+
+---
+
 ## 🚀 Getting Started
 
 ### Prerequisites
@@ -76,103 +86,72 @@ SmartCampusAPI Embedded Grizzly Server has started!
 
 ---
 
-## 💻 Sample cURL Commands
+💻 Sample cURL Commands (Test Suite)
 
-### 1. Discovery — Get API Info
+You can use these commands to verify the core functionality of the API. Ensure the server is running on http://localhost:8080.
 
-```bash
+1. API Discovery (Task 1.2)
+
+Purpose: Demonstrates HATEOAS and root-level entry point.
+
+Bash
+
+
+
 curl -X GET http://localhost:8080/api/v1
-```
 
-**Response:**
-```json
-{
-  "name": "Smart Campus API",
-  "version": "1.0.0",
-  "contact": {
-    "author": "Jayathmi Mehansa Gunawardhana",
-    "student_id": "20231209 / w2120249",
-    "email": "w2120249@westminster.ac.uk"
-  },
-  "description": "RESTful API for Smart Campus Room and Sensor management.",
-  "_links": {
-    "rooms": "/api/v1/rooms",
-    "sensors": "/api/v1/sensors"
-  }
-}
-```
+2. Register a New Room (Task 2.1)
 
-### 2. Create a Room
+Purpose: Initializes a room resource in the DataStore.
 
-```bash
+Bash
+
+
+
 curl -X POST http://localhost:8080/api/v1/rooms \
+
   -H "Content-Type: application/json" \
-  -d '{"id": "R003", "name": "Lecture Hall A", "capacity": 50}'
-```
 
-**Response (201 Created):**
-```json
-{
-  "id": "R003",
-  "name": "Lecture Hall A",
-  "capacity": 50,
-  "sensorIds": []
-}
-```
+  -d '{"id": "R-101", "name": "Main Lab", "capacity": 50}'
 
-### 3. Create a Sensor (linked to Room R001)
+3. Register a Sensor to a Room (Task 3.1)
 
-```bash
-curl -X POST "http://localhost:8080/api/v1/sensors?roomId=R001" \
+Purpose: Demonstrates dependency validation and relational linking.
+
+Bash
+
+
+
+curl -X POST "http://localhost:8080/api/v1/sensors?roomId=R-101" \
+
   -H "Content-Type: application/json" \
-  -d '{"id": "S1", "type": "Temperature", "description": "Main temp sensor", "status": "ACTIVE", "currentValue": 24.5}'
-```
 
-**Response (201 Created):**
-```json
-{
-  "id": "S1",
-  "type": "Temperature",
-  "description": "Main temp sensor",
-  "status": "ACTIVE",
-  "currentValue": 24.5,
-  "roomId": "R001"
-}
-```
+  -d '{"id": "S-01", "type": "Temperature", "status": "ACTIVE"}'
 
-### 4. Add a Reading to Sensor S1
+4. Submit a Sensor Reading (Task 4.1)
 
-```bash
-curl -X POST http://localhost:8080/api/v1/sensors/S1/readings \
+Purpose: Demonstrates the sub-resource locator pattern (/sensors/{id}/readings).
+
+Bash
+
+
+
+curl -X POST http://localhost:8080/api/v1/sensors/S-01/readings \
+
   -H "Content-Type: application/json" \
-  -d '{"value": 26.3}'
-```
 
-**Response (201 Created):**
-```json
-{
-  "id": "7485301a-8f92-4217-9150-1845610d486d",
-  "value": 26.3,
-  "timestamp": 1713882000000
-}
-```
+  -d '{"value": 24.5}'
 
-### 5. Get Reading History for Sensor S1
+5. Retrieve Historical Readings (Task 4.1)
 
-```bash
-curl -X GET http://localhost:8080/api/v1/sensors/S1/readings
-```
+Purpose: Fetches the collection of readings for a specific sensor.
 
-**Response (200 OK):**
-```json
-[
-  {
-    "id": "7485301a-8f92-4217-9150-1845610d486d",
-    "value": 26.3,
-    "timestamp": 1713882000000
-  }
-]
-```
+Bash
+
+
+
+curl -X GET http://localhost:8080/api/v1/sensors/S-01/readings
+
 
 ---
 
