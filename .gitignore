@@ -1,0 +1,55 @@
+# ========================
+# Build output
+# ========================
+/target/
+
+# ========================
+# IDE — IntelliJ IDEA
+# ========================
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# ========================
+# IDE — Eclipse
+# ========================
+.settings/
+.classpath
+.project
+bin/
+
+# ========================
+# IDE — VS Code
+# ========================
+.vscode/
+
+# ========================
+# IDE — NetBeans
+# ========================
+nb-configuration.xml
+nbproject/
+nbactions.xml
+nb-configuration.xml
+
+# ========================
+# OS files
+# ========================
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# ========================
+# Maven
+# ========================
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+
+# ========================
+# Logs
+# ========================
+*.log
