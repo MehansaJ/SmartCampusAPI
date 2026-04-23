@@ -71,8 +71,8 @@ SmartCampusAPI Embedded Grizzly Server has started!
 | `GET` | `/api/v1/sensors` | Get all sensors (optional `?type=` filter) |
 | `POST` | `/api/v1/sensors?roomId={id}` | Create a sensor and link it to a room |
 | `PUT` | `/api/v1/sensors/{id}` | Update a sensor's current value |
-| `GET` | `/api/v1/sensors/{id}/readings` | Get all readings for a sensor |
-| `POST` | `/api/v1/sensors/{id}/readings` | Add a new reading to a sensor |
+| `GET` | `/api/v1/sensors/{id}/readings` | Get all readings (Sub-resource via `SensorResource`) |
+| `POST` | `/api/v1/sensors/{id}/readings` | Add a new reading (Sub-resource via `SensorResource`) |
 
 ---
 
@@ -89,6 +89,11 @@ curl -X GET http://localhost:8080/api/v1
 {
   "name": "Smart Campus API",
   "version": "1.0.0",
+  "contact": {
+    "author": "Jayathmi Mehansa Gunawardhana",
+    "student_id": "20231209 / w2120249",
+    "email": "w2120249@westminster.ac.uk"
+  },
   "description": "RESTful API for Smart Campus Room and Sensor management.",
   "_links": {
     "rooms": "/api/v1/rooms",
@@ -102,7 +107,7 @@ curl -X GET http://localhost:8080/api/v1
 ```bash
 curl -X POST http://localhost:8080/api/v1/rooms \
   -H "Content-Type: application/json" \
-  -d '{"id": "R003", "name": "Lecture Hall A", "floor": 3}'
+  -d '{"id": "R003", "name": "Lecture Hall A", "capacity": 50}'
 ```
 
 **Response (201 Created):**
@@ -110,8 +115,8 @@ curl -X POST http://localhost:8080/api/v1/rooms \
 {
   "id": "R003",
   "name": "Lecture Hall A",
-  "floor": 3,
-  "sensors": []
+  "capacity": 50,
+  "sensorIds": []
 }
 ```
 
@@ -131,7 +136,7 @@ curl -X POST "http://localhost:8080/api/v1/sensors?roomId=R001" \
   "description": "Main temp sensor",
   "status": "ACTIVE",
   "currentValue": 24.5,
-  "readings": []
+  "roomId": "R001"
 }
 ```
 
@@ -146,8 +151,9 @@ curl -X POST http://localhost:8080/api/v1/sensors/S1/readings \
 **Response (201 Created):**
 ```json
 {
+  "id": "7485301a-8f92-4217-9150-1845610d486d",
   "value": 26.3,
-  "timestamp": "2026-04-23T17:00:00"
+  "timestamp": 1713882000000
 }
 ```
 
@@ -161,8 +167,9 @@ curl -X GET http://localhost:8080/api/v1/sensors/S1/readings
 ```json
 [
   {
+    "id": "7485301a-8f92-4217-9150-1845610d486d",
     "value": 26.3,
-    "timestamp": "2026-04-23T17:00:00"
+    "timestamp": 1713882000000
   }
 ]
 ```
@@ -202,7 +209,7 @@ The thread-safety concern comes from the fact that multiple requests can hit the
 
 - **`ConcurrentHashMap`** — Used to store Rooms and Sensors. This map allows multiple threads to read and write at the same time without locking the entire map. It divides the data into segments and only locks the segment being written to, so reads are almost never blocked.
 
-- **`CopyOnWriteArrayList`** — Used for the list of Sensors inside each Room and the list of Readings inside each Sensor. Every time something is added to this list, it creates a brand new copy of the underlying array. This means readers never need a lock — they just read the current snapshot. It's ideal here because readings and sensor lists are read far more often than they are written to.
+- **`CopyOnWriteArrayList`** — Used for the list of Sensor IDs inside each Room and the list of Readings inside each Sensor. Every time something is added to this list, it creates a brand new copy of the underlying array. This means readers never need a lock — they just read the current snapshot. It's ideal here because readings and sensor lists are read far more often than they are written to.
 
 This combination ensures that the API can safely handle many simultaneous requests without data corruption or race conditions.
 
@@ -224,13 +231,13 @@ This is similar to how a person navigates a website — they don't memorize ever
 
 When returning a list of rooms from `GET /api/v1/rooms`, there are two approaches:
 
-**Option A — Return full objects:** Each room comes with all its fields (id, name, floor, sensors list). This is what this API currently does. The benefit is that the client gets everything it needs in one request. No follow-up calls are needed to get the details of each room.
+**Option A — Return full objects:** Each room comes with all its fields (id, name, capacity, sensorIds list). This is what this API currently does. The benefit is that the client gets everything it needs in one request. No follow-up calls are needed to get the details of each room.
 
 **Option B — Return only IDs:** Each room would just be represented by its ID string. The client would then need to make a separate `GET /api/v1/rooms/{id}` request for each room to get its full details.
 
 The trade-off comes down to **bandwidth vs processing**:
 
-- Full objects use **more bandwidth** per response because the payload is bigger, especially when rooms have many sensors with readings. For mobile clients on slow connections, this can be a problem.
+- Full objects use **more bandwidth** per response because the payload is bigger, especially when rooms have many sensor IDs. For mobile clients on slow connections, this can be a problem.
 - Only IDs use **less bandwidth** initially, but the client ends up making N additional HTTP requests (one per room), which means more total processing, more latency, and more load on the server. This is known as the "N+1 problem."
 
 For this project, returning full objects makes more sense because the dataset is relatively small (in-memory data, campus-scale). The extra bandwidth is negligible, and it avoids the overhead of multiple round trips. For a much larger system with thousands of rooms, a paginated approach or a summary view (returning partial objects) would be a better middle ground.
